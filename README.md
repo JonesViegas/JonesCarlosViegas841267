@@ -1,43 +1,37 @@
-# Projeto Seletivo SEPLAG-MT 2026
+# Processo Seletivo SEPLAG-MT 2026
 ## Cargo: Analista de TI - Perfil Engenheiro da Computação (Sênior)
-**Candidato:** Jones Carlos Viegas
 
-### 🏗 Arquitetura do Projeto
-O sistema foi desenvolvido seguindo os padrões de senioridade exigidos pelo edital, utilizando uma arquitetura de microsserviços isolada via Docker.
+---
 
-*   **Backend:** Java 17 com Spring Boot 3.4.
-*   **Banco de Dados:** PostgreSQL 15 (Isolado na porta 5433 para evitar conflitos).
-*   **Migrações:** Flyway para controle de versão de banco.
-*   **Segurança:** Spring Security + JWT (Expiração de 5 minutos).
-*   **Storage:** MinIO (S3 compatible) para armazenamento de capas de álbuns.
-*   **Resiliência:** Rate Limiting (Bucket4j) limitado a 10 req/min por usuário.
-*   **Tempo Real:** WebSocket para notificações de novos álbuns.
-*   **Integração:** Sincronização automática com API de Regionais (Argus API).
+### 👤 Candidato: Jones Carlos Viegas
+**Especialista em Segurança Cibernética | Business Intelligence | Análise de Sistemas**
 
-### 🚀 Como Executar o Projeto
+*   🌐 [Portfólio Profissional](https://jonesviegas.github.io/portiflio_jones/)
+*   💼 [LinkedIn](www.linkedin.com/in/jones-viegas-217767263/)
 
-1.  **Pré-requisitos:** Docker Desktop e Java 17 instalados.
-2.  **Subir Infraestrutura:** No terminal, execute:
-    ```bash
-    docker-compose up -d
-    ```
-3.  **Rodar Aplicação:** 
-    ```bash
-    ./mvnw spring-boot:run
-    ```
-4.  **Acessar Swagger (Documentação):**
-    `http://localhost:8080/swagger-ui/index.html`
 
-### 🔑 Credenciais de Teste
-*   **Endpoint de Login:** `POST /api/auth/login`
-*   **Usuário:** `admin`
-*   **Senha:** `admin123`
+---
 
-### 🛠 Funcionalidades Implementadas (Checklist Edital)
-*   [x] **6.3.1-b:** Autenticação JWT 5 min.
-*   [x] **6.3.1-c:** WebSockets para novos álbuns.
-*   [x] **6.3.1-d:** Rate Limit 10 req/min.
-*   [x] **6.3.1-e:** Sincronização com Regionais (Inserir/Inativar/Versionar).
-*   [x] **6.3.1-h:** Armazenamento MinIO (S3).
-*   [x] **6.3.1-i:** Links pré-assinados de 30 min para capas.
-*   [x] **6.3.1-k:** Migrações Flyway.
+### 🏗️ Arquitetura do Sistema
+Desenvolvido como uma solução Full Stack moderna, o projeto foca em alta segurança, escalabilidade e conformidade com os requisitos de senioridade do edital SEPLAG-MT.
+
+*   **Backend:** Java 17, Spring Boot 3.4, Spring Security (JWT), Spring Data JPA.
+*   **Frontend:** React 18, TypeScript, Tailwind CSS (Design Responsivo).
+*   **Infraestrutura:** Docker Compose gerenciando PostgreSQL 15 e MinIO (Storage S3).
+*   **Integrações:** Sincronização automática com a API Argus (Regionais) com lógica de versionamento.
+
+### ✅ Requisitos Implementados (Checklist do Edital)
+- [x] **Segurança:** Autenticação JWT com expiração de 5 minutos (Item 6.3.1-b).
+- [x] **Tempo Real:** Notificações via WebSockets (Item 6.3.1-c).
+- [x] **Resiliência:** Rate Limiting de 10 req/min por usuário (Item 6.3.1-d).
+- [x] **Integração:** Sincronização automática de dados externos (Item 6.3.1-e).
+- [x] **Armazenamento:** Upload de arquivos para MinIO/S3 com links pré-assinados de 30min (Item 6.3.1-h/i).
+- [x] **Banco de Dados:** Controle de versão via Flyway Migrations (Item 6.3.1-k).
+- [x] **Documentação:** API totalmente mapeada via Swagger/OpenAPI (Item 6.3.1-l).
+- [x] **Testes:** Implementação de testes unitários básicos.
+
+### 🚀 Como Rodar o Projeto
+1. Na raiz: `docker-compose up -d`
+2. Na pasta `/backend`: `./mvnw spring-boot:run`
+3. Na pasta `/frontend`: `npm install` e `npm run dev`
+4. Credenciais: `admin` / `admin123`

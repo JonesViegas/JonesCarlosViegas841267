@@ -19,12 +19,21 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+        http        
+        .cors(cors -> cors.configurationSource(request -> {
+            var opt = new org.springframework.web.cors.CorsConfiguration();
+            // Porta padrão do Vite (Frontend)
+            opt.setAllowedOrigins(java.util.List.of("http://localhost:5173")); 
+            opt.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            opt.setAllowedHeaders(java.util.List.of("*"));
+            opt.setAllowCredentials(true);
+            return opt;
+        }))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Forma moderna: sem necessidade de importar Matchers extras
-                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/api/regionais/**","/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
