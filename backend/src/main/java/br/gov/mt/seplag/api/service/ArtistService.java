@@ -22,8 +22,8 @@ public class ArtistService {
 
     @Transactional
     public Artist save(ArtistDTO dto) {
-        Artist artist = new Artist(dto.getName(), dto.getGenre());
-        
+        Artist artist = new Artist(dto.getName(), dto.getGenre(), dto.getRegionalId());
+
         // Aqui depois adicionaremos a lógica para vincular álbuns
         return artistRepository.save(artist);
     }

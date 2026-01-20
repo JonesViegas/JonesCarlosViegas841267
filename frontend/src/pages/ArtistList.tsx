@@ -1,136 +1,129 @@
 import { useEffect, useState } from 'react';
 import api from '../service/api';
 
-// Definição de Tipos para o TypeScript (Requisito Sênior)
-interface Artist {
-  id: number;
-  name: string;
-  genre: string;
-}
-
-interface Regional {
-  id: number;
-  nome: string;
-  ativo: boolean;
-}
+interface Artist { id: number; name: string; genre: string; regionalId: number; }
+interface Regional { id: number; nome: string; ativo: boolean; }
 
 export function ArtistList() {
   const [artists, setArtists] = useState<Artist[]>([]);
   const [regionais, setRegionais] = useState<Regional[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRegId, setSelectedRegId] = useState<number | null>(null);
   const [name, setName] = useState('');
   const [genre, setGenre] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  // 1. Função para carregar dados do Backend
   const fetchData = async () => {
     try {
-      const [artistRes, regionalRes] = await Promise.all([
-        api.get('/artists'),
-        api.get('/regionais') // Criamos esse endpoint no Java antes
-      ]);
-      setArtists(artistRes.data);
-      setRegionais(regionalRes.data);
-    } catch (err: any) {
-      if (err.response?.status === 403) {
-        alert("Sua sessão expirou (limite de 5 min). Faça login novamente.");
-        window.location.href = '/';
-      }
-      console.error("Erro ao carregar dados", err);
-    }
+      const [artRes, regRes] = await Promise.all([api.get('/artists'), api.get('/regionais')]);
+      setArtists(artRes.data || []);
+      setRegionais(regRes.data || []);
+    } catch (err) { console.error("Erro ao carregar dados", err); }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  // 2. Função para cadastrar novo artista (Corrigida)
   const handleCreateArtist = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (!selectedRegId) return alert("Selecione uma Regional na barra lateral primeiro!");
     try {
-      await api.post('/artists', { name, genre });
-      setName('');
-      setGenre('');
-      await fetchData(); // Força a atualização da lista
-      alert("Artista cadastrado com sucesso!");
-    } catch (err) {
-      alert("Erro ao cadastrar. Verifique se o servidor está ligado.");
-    } finally {
-      setLoading(false);
-    }
+      await api.post('/artists', { name, genre, regionalId: selectedRegId });
+      setName(''); setGenre('');
+      fetchData();
+      alert("Cadastro realizado com sucesso!");
+    } catch (err) { alert("Erro ao cadastrar"); }
   };
 
+  // Lógica de filtro segura
+  const filteredArtists = artists.filter(artist => {
+    const matchesSearch = artist.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRegional = selectedRegId ? artist.regionalId === selectedRegId : true;
+    return matchesSearch && matchesRegional;
+  });
+
+  // Encontrar o nome da regional selecionada de forma segura
+  const currentRegionalName = selectedRegId 
+    ? regionais.find(r => r.id === selectedRegId)?.nome 
+    : "Gestão de Artistas";
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row w-full">
-      
-      {/* SIDEBAR: Regionais (Exigência 6.3.1-e) */}
-      <aside className="w-full md:w-64 bg-blue-900 text-white p-6 shadow-xl">
-        <div className="mb-10 flex justify-center border-b border-blue-800 pb-6">
-            <img src="/logo-seplag.png" alt="SEPLAG" className="h-18 brightness-120" />
+    <div className="min-h-screen bg-gray-50 flex w-full" key="main-container">
+      {/* SIDEBAR */}
+      <aside className="w-72 bg-blue-900 text-white p-6 shadow-2xl hidden md:block">
+        <div className="mb-10 border-b border-blue-800 pb-6">
+          <img src="/logo-seplag.png" alt="SEPLAG" className="h-12 mx-auto" />
         </div>
-        <h2 className="text-lg font-bold mb-6 text-blue-200 uppercase text-xs tracking-widest">Regionais SEPLAG</h2>
-        <ul className="space-y-3">
-          {regionais.map(reg => (
-            <li key={reg.id} className="flex items-center gap-2 text-sm">
-              <span className={`w-2 h-2 rounded-full ${reg.ativo ? 'bg-green-400' : 'bg-red-400'}`}></span>
-              {reg.nome}
+        <h2 className="text-[10px] font-black text-blue-300 uppercase mb-6">Filtrar por Unidade</h2>
+        <ul className="space-y-1">
+          <li 
+            key="all-units"
+            onClick={() => setSelectedRegId(null)}
+            className={`cursor-pointer p-3 rounded-xl transition-all ${!selectedRegId ? 'bg-blue-600 font-bold' : 'hover:bg-blue-800 text-blue-100'}`}
+          >
+            🌎 Todas as Regionais
+          </li>
+          {regionais.filter(reg => reg.nome.startsWith('REGIONAL')).map(reg => (
+            <li 
+              key={`reg-${reg.id}`} // KEY ÚNICA
+              onClick={() => setSelectedRegId(reg.id)}
+              className={`cursor-pointer p-3 rounded-xl text-sm transition-all ${selectedRegId === reg.id ? 'bg-blue-600 font-bold' : 'hover:bg-blue-800'}`}
+            >
+              {reg.nome.replace('REGIONAL DE ', '')}
             </li>
           ))}
         </ul>
       </aside>
 
-      {/* CONTEÚDO PRINCIPAL */}
-      <main className="flex-1 p-4 md:p-10">
-        <div className="max-w-5xl mx-auto">
-          
-          <div className="flex justify-between items-center mb-10">
-            <h1 className="text-3xl font-extrabold text-gray-800">Gestão de Artistas</h1>
-            <button 
-              onClick={() => { localStorage.clear(); window.location.href='/'; }}
-              className="bg-white text-red-600 border border-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition"
-            >
-              Sair do Sistema
-            </button>
+      <main className="flex-1 p-6 md:p-12 overflow-y-auto">
+        <div className="max-w-6xl mx-auto">
+          {/* HEADER */}
+          <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6" key={`header-${selectedRegId}`}>
+            <div>
+              <h1 className="text-3xl font-black text-gray-800 uppercase tracking-tight">
+                {currentRegionalName}
+              </h1>
+              <p className="text-gray-500">Painel de controle - SEPLAG MT</p>
+            </div>
+            <input 
+              type="text" placeholder="🔍 Buscar artista..." 
+              className="border-2 border-gray-100 p-4 rounded-2xl w-full md:w-80 shadow-sm focus:border-blue-500 outline-none"
+              value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
-          {/* FORMULÁRIO DE CADASTRO */}
-          <div className="bg-white p-8 rounded-xl shadow-sm mb-10 border border-gray-100">
-            <h2 className="text-lg font-bold mb-4 text-gray-700">Novo Cadastro</h2>
-            <form onSubmit={handleCreateArtist} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <input 
-                type="text" placeholder="Nome Completo" 
-                className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                value={name} onChange={e => setName(e.target.value)} required 
-              />
-              <input 
-                type="text" placeholder="Gênero Musical" 
-                className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                value={genre} onChange={e => setGenre(e.target.value)} required 
-              />
-              <button 
-                type="submit" disabled={loading}
-                className="bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 disabled:bg-gray-400"
-              >
-                {loading ? 'Salvando...' : 'Cadastrar Artista'}
+          {/* FORMULÁRIO */}
+          <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-12">
+            <h2 className="text-xs font-bold text-blue-600 uppercase mb-6">Novo Cadastro Vinculado</h2>
+            <form onSubmit={handleCreateArtist} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <input type="text" placeholder="Nome" className="bg-gray-50 p-4 rounded-xl outline-none" value={name} onChange={e => setName(e.target.value)} required />
+              <input type="text" placeholder="Gênero" className="bg-gray-50 p-4 rounded-xl outline-none" value={genre} onChange={e => setGenre(e.target.value)} required />
+              <button type="submit" className="bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg active:scale-95 transition-all">
+                + Cadastrar Artista
               </button>
             </form>
-          </div>
+          </section>
 
-          {/* LISTAGEM DE CARDS */}
-          <h2 className="text-xl font-bold mb-6 text-gray-700">Artistas no Banco de Dados</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {artists.map(artist => (
-              <div key={artist.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-1 rounded uppercase">Ativo</div>
-                  <span className="text-gray-300 text-xs font-mono">ID: #{artist.id}</span>
+          {/* GRID */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredArtists.map(artist => (
+              <div key={`artist-${artist.id}`} className="bg-white p-8 rounded-3xl shadow-sm border border-gray-50 hover:shadow-xl transition-all">
+                <div className="flex justify-between mb-6">
+                  <span className="bg-green-100 text-green-700 text-[10px] font-black px-3 py-1 rounded-full uppercase">Ativo</span>
+                  <span className="text-gray-300 font-mono">#{artist.id}</span>
                 </div>
-                <h3 className="text-lg font-bold text-gray-800 mb-1">{artist.name}</h3>
-                <p className="text-gray-500 text-sm mb-4">{artist.genre}</p>
-                <button className="w-full text-sm py-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100">+ Gerenciar Álbuns</button>
+                <h3 className="text-xl font-bold text-gray-800">{artist.name}</h3>
+                <p className="text-gray-400 text-sm mb-6">{artist.genre}</p>
+                <button className="w-full py-3 bg-gray-50 text-gray-500 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all">
+                  Álbuns
+                </button>
               </div>
             ))}
           </div>
+
+          {filteredArtists.length === 0 && (
+            <div className="text-center py-20 bg-gray-100 rounded-3xl border-2 border-dashed border-gray-200">
+              <p className="text-gray-400 font-medium">Nenhum artista encontrado para esta seleção.</p>
+            </div>
+          )}
         </div>
       </main>
     </div>

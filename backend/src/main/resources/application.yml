@@ -26,8 +26,8 @@ spring:
 # Configurações customizadas que usaremos depois
 app:
   jwt:
-    secret: dGhpcy1pcy1hLXZlcnktc2VjdXJlLWtlLWZvci1zZXBsYWctbXQtMjAyNi1wcm9qZWN0LXNlbmlvci=
-    expiration-minutes: 5 # Exigência do edital
+    secret: dGhpcy1pcy1hLXZlcnktc2VjdXJlLWtleS1mb3Itc2VwbGFnLW10LTIwMjYtcHJvamVjdC1zZW5pb3I=
+    expiration-minutes: 60
   minio:
     endpoint: http://localhost:9000
     access-key: admin

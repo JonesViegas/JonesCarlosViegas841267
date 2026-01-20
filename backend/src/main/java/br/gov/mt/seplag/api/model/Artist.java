@@ -10,13 +10,19 @@ public class Artist {
     private Long id;
     private String name;
     private String genre;
+    private Integer regionalId;
 
     public Artist() {}
-    public Artist(String name, String genre) { this.name = name; this.genre = genre; }
-
+    public Artist(String name, String genre, Integer regionalId) { 
+        this.name = name; 
+        this.genre = genre; 
+        this.regionalId = regionalId; // ATUALIZE O CONSTRUTOR
+    }
     public Long getId() { return id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getGenre() { return genre; }
     public void setGenre(String genre) { this.genre = genre; }
+    public Integer getRegionalId() { return regionalId; }
+    public void setRegionalId(Integer regionalId) { this.regionalId = regionalId; }
 }
