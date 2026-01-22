@@ -16,7 +16,7 @@ public class Artist {
     public Artist(String name, String genre, Integer regionalId) { 
         this.name = name; 
         this.genre = genre; 
-        this.regionalId = regionalId; // ATUALIZE O CONSTRUTOR
+        this.regionalId = regionalId; 
     }
     public Long getId() { return id; }
     public String getName() { return name; }

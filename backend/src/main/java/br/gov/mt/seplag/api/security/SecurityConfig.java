@@ -49,14 +49,11 @@ public class SecurityConfig {
             // 4. Regras de Acesso às Rotas
             .authorizeHttpRequests(auth -> auth
                 // Rotas Abertas (Sem necessidade de Token para seu teste agora)
+                 .requestMatchers("/api/auth/login").permitAll() 
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/regionais/**").permitAll()
-                .requestMatchers("/api/artists/**").permitAll() 
-                
-                // Swagger e Documentação (Requisito do Edital)
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                
-                // Qualquer outra rota exige autenticação
+                .requestMatchers("/api/artists/**").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
             )
             

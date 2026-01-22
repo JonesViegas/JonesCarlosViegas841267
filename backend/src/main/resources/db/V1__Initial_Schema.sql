@@ -2,7 +2,8 @@
 CREATE TABLE artists (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    genre VARCHAR(100) NOT NULL
+    genre VARCHAR(100) NOT NULL,
+    regional_id INTEGER -- VERIFIQUE SE ESTA LINHA ESTÁ AQUI
 );
 
 -- Tabela de Álbuns
